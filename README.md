@@ -8,10 +8,11 @@ An image to upload an Android App Bundle (`.aab`) to Google play.
 docker run --rm \
 	-v /path/to/the/bundle.aab:/bundle.aab \
 	-v /path/to/the/mapping.txt:/mapping.txt \
-	-v /path/to/the/client_secrets.json:/client_secrets.json \
-	-v /path/to/the/androidpublisher.dat:/androidpublisher.dat \
-	21buttons/google-play-publisher package_name
+	-v /Users/brais/projects/21buttons/key.p12:/key.p12 \
+	-e "PACKAGE_NAME=com.android21buttons" \
+	-e "SERVICE_ACCOUNT_EMAIL=your.service@account.email" \
+	21buttons/google-play-publisher
 ```
 
-The documentation about how to generate the `client_secrets.json` and `androidpublisher.dat`
-is here: https://github.com/googlesamples/android-play-publisher-api/tree/master/v3/python
+The documentation about how to get the `key.p12` is here:
+https://github.com/googlesamples/android-play-publisher-api/tree/master/v3/python

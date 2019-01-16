@@ -14,40 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Uploads an apk to the alpha track."""
-
-import argparse
-import sys
-from apiclient import sample_tools
+"""Uploads an aab to the alpha track."""
+import os
+from apiclient.discovery import build
+import httplib2
 from oauth2client import client
+from oauth2client.service_account import ServiceAccountCredentials
 
 TRACK = 'alpha'  # Can be 'alpha', beta', 'production' or 'rollout'
 
-# Declare command-line flags.
-argparser = argparse.ArgumentParser(add_help=False)
-argparser.add_argument('package_name',
-                       help='The package name. Example: com.android.sample')
-argparser.add_argument('bundle_file',
-                       help='The path to the Bundle file to upload.')
-argparser.add_argument('mapping_file',
-                       help='The path to the mapping file to upload.')
+PACKAGE_NAME = os.environ['PACKAGE_NAME']
+SERVICE_ACCOUNT_EMAIL = os.environ['SERVICE_ACCOUNT_EMAIL']
 
 
-def main(argv):
-    # Authenticate and construct service.
-    service, flags = sample_tools.init(
-        argv,
-        'androidpublisher',
-        'v3',
-        __doc__,
-        __file__,
-        parents=[argparser],
-        scope='https://www.googleapis.com/auth/androidpublisher')
+def main():
+    # Create an httplib2.Http object to handle our HTTP requests and authorize it
+    # with the Credentials. Note that the first parameter, service_account_name,
+    # is the Email address created for the Service account. It must be the email
+    # address associated with the key that was created.
+    credentials = ServiceAccountCredentials.from_p12_keyfile(
+        SERVICE_ACCOUNT_EMAIL,
+        'key.p12',
+        scopes=['https://www.googleapis.com/auth/androidpublisher'])
+    http = httplib2.Http()
+    http = credentials.authorize(http)
+
+    service = build('androidpublisher', 'v3', http=http)
 
     # Process flags and read their values.
-    package_name = flags.package_name
-    bundle_file = flags.bundle_file
-    mapping_file = flags.mapping_file
+    package_name = PACKAGE_NAME
+    bundle_file = '/bundle.aab'
+    mapping_file = '/mapping.txt'
 
     try:
         edit_request = service.edits().insert(body={}, packageName=package_name)
@@ -96,4 +93,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
